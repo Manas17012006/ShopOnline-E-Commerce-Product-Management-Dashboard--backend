@@ -14,7 +14,7 @@ const allowedOrigins=['http://localhost:5173','https://shoponline-or9y.vercel.ap
 app.use(cookieparser());
 app.use(
   cors({
-    origin:allowedOrigins,
+    origin:'https://shoponline-or9y.vercel.app',
     credentials: true,
   })
 );
