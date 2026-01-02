@@ -75,65 +75,48 @@ const register = async (req, res) => {
 //login
 const login = async (req, res) => {
   const { email, password } = req.body;
-  if (!email || !password) {
-    return res
-      .status(400)
-      .send({ success: false, message: "All fields required" });
-  }
+  if (!email || !password)
+    return res.status(400).send({ success: false, message: "All fields required" });
+
   try {
     const user = await userModel.findOne({ email });
-    if (!user) {
-      return res
-        .status(200)
-        .send({ success: false, message: "User Not Found,Register first!" });
-    }
+    if (!user)
+      return res.status(200).send({ success: false, message: "User Not Found, register first!" });
+
     const isMatch = bcrypt.compareSync(password, user.password);
-    if (!isMatch) {
-      return res
-        .status(200)
-        .send({ success: false, message: "Incorrect Password" });
-    }
+    if (!isMatch)
+      return res.status(200).send({ success: false, message: "Incorrect Password" });
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
-    });
+    // token can just be user._id (or you can still use JWT)
+    const token = user._id.toString();
 
-   res.cookie("token", token, {
-  httpOnly: true,
-  secure: true,
-  sameSite: "none",
-  maxAge: 7 * 24 * 60 * 60 * 1000,
-});
+    // store token in user record (acts like backend localStorage)
+    user.token = token;
+    await user.save();
 
-    return res.status(201).send({ success: true });
+    return res.status(201).send({ success: true, message: "Logged in successfully", token });
   } catch (err) {
     return res.status(400).send({ success: false, message: err.message });
   }
 };
 
+
 //logout
 const logout = async (req, res) => {
   try {
-    const userId = req.userId;
-    const user = await userModel.findById(userId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
-    }
-    user.isVerified = false;
+    const user = await userModel.findById(req.userId);
+    if (!user) return res.status(404).send({ success: false, message: "User not found" });
+
+    // remove token
+    user.token = "";
     await user.save();
-    res.clearCookie("token", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-    });
+
     return res.json({ success: true, message: "Logged out successfully" });
   } catch (err) {
     return res.status(400).send({ success: false, message: err.message });
   }
 };
+
 
 async function sendVerifyOtp(req, res) {
   try {

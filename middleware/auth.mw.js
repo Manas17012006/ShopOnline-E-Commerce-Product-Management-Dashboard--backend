@@ -1,26 +1,19 @@
-require('dotenv').config();
-const jwt = require('jsonwebtoken');
-
-async function userauth(req, res, next) {
-  const { token } = req.cookies;
-
-  if (!token) {
-    return res.json({
-      success: false,
-      message: "Please Login to get started!",
-    });
-  }
-
+const userauth = async (req, res, next) => {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.userId = decoded.id; 
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token)
+      return res.status(401).json({ success: false, message: "Please login to get started!" });
+
+    // find user by token
+    const user = await userModel.findOne({ token });
+    if (!user)
+      return res.status(401).json({ success: false, message: "Invalid token" });
+
+    req.userId = user._id;
     next();
   } catch (err) {
-    return res.status(401).json({
-      success: false,
-      message: "Invalid token",
-    });
+    return res.status(401).json({ success: false, message: "Invalid or expired token" });
   }
-}
+};
 
 module.exports = { userauth };
