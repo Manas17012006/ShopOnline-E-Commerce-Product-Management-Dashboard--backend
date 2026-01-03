@@ -63,7 +63,7 @@ app.use("/api/product",product_schema)
 app.use("/api/order",order_route);
 //establish the server
 
-// app.listen(process.env.PORT,()=>{
-//     console.log(`Server started at port ${process.env.PORT}`);
-// })
+app.listen(process.env.PORT,()=>{
+    console.log(`Server started at port ${process.env.PORT}`);
+})
 module.exports=app;
