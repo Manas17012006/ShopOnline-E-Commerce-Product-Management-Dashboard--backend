@@ -1,25 +1,44 @@
-const userModel = require('../models/userModel.model');
+require('dotenv').config();
+const jwt = require('jsonwebtoken');
+const userModel = require("../models/userModel.model");
+async function userauth(req, res, next) {
+  // const { token } = req.cookies;
 
-const userauth = async (req, res, next) => {
-  try {
-    // Get token either from header or req.body (your choice)
-    const token = req.headers.authorization?.split(" ")[1] || req.body.token;
-    if (!token) {
-      return res.status(401).json({ success: false, message: "Please login to get started!" });
+  // if (!token) {
+  //   return res.json({
+  //     success: false,
+  //     message: "Please Login to get started!",
+  //   });
+  // }
+
+  // try {
+  //   const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  //   req.userId = decoded.id; 
+  //   next();
+  // } catch (err) {
+  //   return res.status(401).json({
+  //     success: false,
+  //     message: "Invalid token",
+  //   });
+  // }
+  try{
+     const user = await userModel.findOne({
+      token: { $ne: "", $exists: true }
+    });
+    if(!user)
+    {
+      return res.send({success:false,message:"Please Login to get started!"})
     }
-
-    // Find user by token stored in DB
-    const user = await userModel.findOne({ token: token });
-    if (!user) {
-      return res.status(401).json({ success: false, message: "Invalid token" });
+    else
+    {
+      req.userId=user._id;
+      res.send({success:true,message:"Please Login to get started!"});
+      next();
     }
-
-    // Set req.userId for next handlers
-    req.userId = user._id;
-    next();
-  } catch (err) {
-    return res.status(401).json({ success: false, message: "Invalid token" });
+  }catch(err)
+  {
+    return res.send({success:false,message:err.message});
   }
-};
+}
 
 module.exports = { userauth };

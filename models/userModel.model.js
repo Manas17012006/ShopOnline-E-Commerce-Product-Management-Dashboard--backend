@@ -24,7 +24,8 @@ const userSchema = new mongoose.Schema(
           qty:{type:Number,required:true}
         }
       ],default:[]
-    }
+    },
+    token:{type:String,default:""}
   },
   { timestamps: true ,minimize:false}
 );
