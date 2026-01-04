@@ -63,7 +63,13 @@ app.use("/api/product",product_schema)
 app.use("/api/order",order_route);
 //establish the server
 
-app.listen(process.env.PORT,()=>{
-    console.log(`Server started at port ${process.env.PORT}`);
-})
+async function startServer() {
+  await connectdb();
+  app.listen(process.env.PORT, () => {
+    console.log(`🚀 Server started on ${process.env.PORT}`);
+  });
+}
+
+startServer();
+
 module.exports=app;
