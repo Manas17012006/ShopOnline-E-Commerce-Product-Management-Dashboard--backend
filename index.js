@@ -48,7 +48,7 @@ async function connectdb() {
     isConnected = db.connections[0].readyState;
     console.log("✅ MongoDB connected");
   } catch (err) {
-    console.error("❌ MongoDB connection error:", err);
+    console.error(" MongoDB connection error:", err);
     throw err;
   }
 }
@@ -73,6 +73,6 @@ app.use("/api/auth", user_route);
 app.use("/api/product", product_route);
 app.use("/api/order", order_route);
 
-// ❌ NO app.listen() ON VERCEL
+
 
 module.exports = app;
